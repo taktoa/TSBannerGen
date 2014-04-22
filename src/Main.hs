@@ -5,6 +5,7 @@ import Network.CGI
 import Data.String.Utils (replace, split)
 import Data.Either
 import MPD
+import MOCP
 
 tmp = "template.tmp"
 font = "serif"

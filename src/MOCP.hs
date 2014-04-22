@@ -1,9 +1,10 @@
 module MOCP where
 import System.Process
-import State
+import Network.MPD (State (..)) -- borrowing datatypes, for now
+-- import State
 
 mocpQuery :: String -> IO String
-mocpQuery s = readProcess "mocp" ["-q", s] ""
+mocpQuery s = readProcess "mocp" ["-Q", s] ""
 
 stateQuery :: IO State
 stateQuery = convert `fmap` mocpQuery "%state"
@@ -29,6 +30,6 @@ timeQuery :: IO (Int, Int)
 timeQuery = do
     cs <- mocpQuery "%cs"
     ts <- mocpQuery "%ts"
-    return (cs, ts)
+    return (read cs, read ts)
 
 
