@@ -12,7 +12,7 @@ data SongStatus = SongStatus {
         sArtist  :: String,
         sAlbum   :: String,
         sState   :: State,
-        sPercent :: Int
+        sTime    :: (Int, Int)
     } deriving (Show)
 
 type MPDState = (Song, Status)
@@ -35,26 +35,29 @@ sngAlbum = tagHelper Album
 sngState :: MPDState -> State
 sngState = stState . snd
 
-sngPercent :: MPDState -> Int
-sngPercent = round . tupleToPercent . stTime . snd
-    where
-    tupleToPercent (x, y) = 100 * x / fromIntegral y
+sngTime :: MPDState -> (Int, Int)
+sngTime = (\(x, y) -> (round x, fromIntegral y)) . stTime . snd
 
-songStatus :: MPD SongStatus
-songStatus = do
+songStatus' :: MPD (Maybe SongStatus)
+songStatus' = do
     sng <- currentSong
     sts <- status
-    if isJust sng then do
-        let ms = (fromMaybe undefined sng, sts)
+    return $ do
+        msng <- sng
+        let ms = (msng, sts)
         let fl = sngFile ms
         let ti = sngTitle ms
         let ar = sngArtist ms
         let al = sngAlbum ms
         let st = sngState ms
-        let pe = sngPercent ms
-        return (SongStatus fl ti ar al st pe)
-    else
-        return (SongStatus "" "" "" "" Stopped 0)
+        let tm = sngTime ms
+        return (SongStatus fl ti ar al st tm)
+
+songStatus :: MPD SongStatus
+songStatus = do
+    ss <- songStatus'
+    let stop = (SongStatus "" "" "" "" Stopped (0, 1))
+    return $ fromMaybe stop ss
 
 getSongStatus :: IO (Response SongStatus)
 getSongStatus = withMPD $ songStatus

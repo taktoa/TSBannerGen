@@ -12,6 +12,8 @@ style = "normal"
 image = "base.png"
 tsfmt = "%H:%M:%S %Z | %B %e, %Y"
 
+x // y = fromIntegral x / fromIntegral y
+
 date :: String -> IO String
 date s = do
     time <- getClockTime >>= toCalendarTime
@@ -28,7 +30,7 @@ main = do
             Playing -> "&#9654;"
             Paused -> "&#10073;&#10073;"
             Stopped -> "&#9726;"
-    let percent = show pe
+    let percent = show $ round $ (*100) $ uncurry (//) $ pe
     timestamp <- date tsfmt
     let runReplace =  [ replace "SONG_FILE" file,
                         replace "SONG_TITLE" title,
