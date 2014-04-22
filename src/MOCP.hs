@@ -4,7 +4,7 @@ import Network.MPD (State (..)) -- borrowing datatypes, for now
 -- import State
 
 mocpQuery :: String -> IO String
-mocpQuery s = readProcess "mocp" ["-Q", s] ""
+mocpQuery s = init `fmap` readProcess "mocp" ["-Q", s] ""
 
 stateQuery :: IO State
 stateQuery = convert `fmap` mocpQuery "%state"
