@@ -1,19 +1,9 @@
---module MPD (SongStatus, sFile, sTitle, sArtist, sAlbum, sState, sPercent, getSongStatus) where
-module MPD (SongStatus (..), getSongStatus, State (..)) where
+module MPD (getMusicStatus) where
 import Network.MPD
 import Data.Either
 import Data.Maybe
-
--- File, Title, Artist, Album, State, Percent
-
-data SongStatus = SongStatus {
-        sFile    :: String,
-        sTitle   :: String,
-        sArtist  :: String,
-        sAlbum   :: String,
-        sState   :: State,
-        sTime    :: (Int, Int)
-    } deriving (Show)
+import MusicStatus
+import Utility
 
 type MPDState = (Song, Status)
 
@@ -21,7 +11,7 @@ sngFile :: MPDState -> String
 sngFile = toString . sgFilePath . fst
 
 tagHelper :: Metadata -> MPDState -> String
-tagHelper m s = fromMaybe "" $ (toString . head) `fmap` (sgGetTag m (fst s))
+tagHelper m s = fromMaybe "" $ (toString . head) <$> (sgGetTag m (fst s))
 
 sngTitle :: MPDState -> String
 sngTitle = tagHelper Title
@@ -32,17 +22,22 @@ sngArtist = tagHelper Artist
 sngAlbum :: MPDState -> String
 sngAlbum = tagHelper Album
 
-sngState :: MPDState -> State
-sngState = stState . snd
+sngState :: MPDState -> MusicState
+sngState = conv . stState . snd
+    where
+    conv Playing = PLAY
+    conv Paused  = PAUSE
+    conv Stopped = STOP
 
 sngTime :: MPDState -> (Int, Int)
 sngTime = (\(x, y) -> (round x, fromIntegral y)) . stTime . snd
 
-songStatus' :: MPD (Maybe SongStatus)
-songStatus' = do
+musicStatus :: MPD MusicStatus
+musicStatus = do
     sng <- currentSong
     sts <- status
-    return $ do
+    let stop = (MusicStatus "" "" "" "" STOP (0, 1))
+    return $ fromMaybe stop $ do
         msng <- sng
         let ms = (msng, sts)
         let fl = sngFile ms
@@ -51,13 +46,8 @@ songStatus' = do
         let al = sngAlbum ms
         let st = sngState ms
         let tm = sngTime ms
-        return (SongStatus fl ti ar al st tm)
+        return (MusicStatus fl ti ar al st tm)
 
-songStatus :: MPD SongStatus
-songStatus = do
-    ss <- songStatus'
-    let stop = (SongStatus "" "" "" "" Stopped (0, 1))
-    return $ fromMaybe stop ss
-
-getSongStatus :: IO (Response SongStatus)
-getSongStatus = withMPD $ songStatus
+getMusicStatus :: IO MusicStatus
+getMusicStatus = either (error . show) (id) <$> (withMPD $ musicStatus)
+        
