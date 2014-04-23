@@ -1,18 +1,13 @@
-module MOCP where
+module MOCP (getMusicStatus) where
 import System.Process
-import Network.MPD (State (..)) -- borrowing datatypes, for now
--- import State
+import MusicStatus
+import Utility
 
 mocpQuery :: String -> IO String
-mocpQuery s = init `fmap` readProcess "mocp" ["-Q", s] ""
+mocpQuery s = init <$> readProcess "mocp" ["-Q", s] ""
 
-stateQuery :: IO State
-stateQuery = convert `fmap` mocpQuery "%state"
-    where
-    convert "PLAY" = Playing
-    convert "PAUSE" = Paused
-    convert "STOP" = Stopped
-    convert _ = error "Unknown response"
+stateQuery :: IO MusicState
+stateQuery = read <$> mocpQuery "%state"
 
 fileQuery :: IO String
 fileQuery = mocpQuery "%file"
@@ -32,4 +27,12 @@ timeQuery = do
     ts <- mocpQuery "%ts"
     return (read cs, read ts)
 
-
+getMusicStatus :: IO MusicStatus
+getMusicStatus = do
+    fi <- fileQuery
+    ti <- titleQuery
+    ar <- artistQuery
+    al <- albumQuery
+    st <- stateQuery
+    tm <- timeQuery
+    return (MusicStatus fi ti ar al st tm)

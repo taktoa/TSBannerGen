@@ -3,8 +3,8 @@ import Network.CGI
 import MusicStatus
 import Data.String.Utils (replace, split)
 import Data.Either
-import MPD
-import MOCP
+import MPD as MPD
+import MOCP as MOCP
 import Utility (date, (//))
 
 tmp = "template.tmp"
@@ -15,7 +15,7 @@ tsfmt = "%H:%M:%S %Z | %B %e, %Y"
 
 main :: IO ()
 main = do
-    ms <- getMusicStatus
+    ms <- MPD.getMusicStatus
     let (MusicStatus fl ti ar al st pe) = ms
     let file = if fl == "" then "" else take 54 $ last $ split "/" fl
     let (title, artist, album) = (take 54 ti, take 54 ar, take 54 al)
