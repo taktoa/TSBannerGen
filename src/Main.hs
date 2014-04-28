@@ -3,23 +3,24 @@ import Network.CGI
 import System.Process.ByteString (readProcessWithExitCode)
 import Data.ByteString.Lazy (fromStrict, toStrict)
 import Data.ByteString.Lazy.Builder (toLazyByteString, stringUtf8)
-import MusicStatus
 import qualified MPD
 import qualified MOCP
 import GenSVG
 import Utility ((<$>))
 
-tmp = "template.tmp"
+tmp = "test.tmp"
 fnt = "serif"
 stl = "normal"
 img = "base.png"
 tft = "%H:%M:%S %Z | %B %e, %Y"
 
+
 main :: IO ()
 main = do
-    ms <- MPD.getMusicStatus
+    mpd  <- MPD.request
+    mocp <- MOCP.request
     let ss = SVGSettings tmp fnt stl img tft
-    r <- genSVG ss ms
+    r <- genSVG ss [mpd, mocp]
     let svg = toStrict $ toLazyByteString $ stringUtf8 r
     png <- readProcess "convert" ["svg:-", "-colors", "16", "png:-"] svg
     runCGI $ handleErrors $ do

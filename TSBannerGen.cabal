@@ -57,10 +57,10 @@ executable TSBannerGen
   -- other-modules:       
   
   -- LANGUAGE extensions used by modules in this package.
-  --other-extensions: QuasiQuotes
+  other-extensions: Safe
   
   -- Other library packages from which modules are imported.
-  build-depends:       base >=4.6 && <4.7, cgi, MissingH, libmpd, old-time, old-locale, process, process-extras, bytestring
+  build-depends:       base >=4.6 && <4.7, cgi, MissingH, libmpd, old-time, old-locale, process, process-extras, bytestring, containers, split
   
   -- Directories containing source files.
   hs-source-dirs:      src

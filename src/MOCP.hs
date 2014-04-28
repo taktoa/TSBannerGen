@@ -1,13 +1,13 @@
-module MOCP (getMusicStatus) where
+module MOCP (request) where
 import System.Process
-import MusicStatus
+import qualified Data.Map.Strict as Map
 import Utility
 
 mocpQuery :: String -> IO String
 mocpQuery s = init <$> readProcess "mocp" ["-Q", s] ""
 
-stateQuery :: IO MusicState
-stateQuery = read <$> mocpQuery "%state"
+stateQuery :: IO String
+stateQuery = mocpQuery "%state"
 
 fileQuery :: IO String
 fileQuery = mocpQuery "%file"
@@ -21,18 +21,24 @@ artistQuery = mocpQuery "%artist"
 albumQuery :: IO String
 albumQuery = mocpQuery "%album"
 
-timeQuery :: IO (Int, Int)
+timeQuery :: IO String
 timeQuery = do
     cs <- mocpQuery "%cs"
     ts <- mocpQuery "%ts"
-    return (read cs, read ts)
+    return $ show (read cs :: Int, read ts :: Int)
 
-getMusicStatus :: IO MusicStatus
-getMusicStatus = do
+request :: IO Replacer
+request = do
     fi <- fileQuery
     ti <- titleQuery
     ar <- artistQuery
     al <- albumQuery
     st <- stateQuery
     tm <- timeQuery
-    return (MusicStatus fi ti ar al st tm)
+    let kv =    [("mocp-file", fi),
+                 ("mocp-title", ti),
+                 ("mocp-artist", ar),
+                 ("mocp-album", al),
+                 ("mocp-state", st),
+                 ("mocp-time", tm)]
+    return $ Map.fromList kv

@@ -1,8 +1,8 @@
-module MPD (getMusicStatus) where
+module MPD (request) where
 import Network.MPD
+import Data.Map.Strict as Map
 import Data.Either
 import Data.Maybe
-import MusicStatus
 import Utility
 
 type MPDState = (Song, Status)
@@ -22,32 +22,43 @@ sngArtist = tagHelper Artist
 sngAlbum :: MPDState -> String
 sngAlbum = tagHelper Album
 
-sngState :: MPDState -> MusicState
+sngState :: MPDState -> String
 sngState = conv . stState . snd
     where
-    conv Playing = PLAY
-    conv Paused  = PAUSE
-    conv Stopped = STOP
+    conv Playing = "PLAY"
+    conv Paused  = "PAUSE"
+    conv Stopped = "STOP"
 
-sngTime :: MPDState -> (Int, Int)
-sngTime = (\(x, y) -> (round x, fromIntegral y)) . stTime . snd
+sngTime :: MPDState -> String
+sngTime = show . (\(x, y) -> (round x, fromIntegral y)) . stTime . snd
 
-musicStatus :: MPD MusicStatus
+musicStatus :: MPD Replacer
 musicStatus = do
     sng <- currentSong
     sts <- status
-    let stop = (MusicStatus "" "" "" "" STOP (0, 1))
-    return $ fromMaybe stop $ do
+    let stop = [("mpd-file", ""),
+                ("mpd-title", ""),
+                ("mpd-artist", ""),
+                ("mpd-album", ""),
+                ("mpd-state", "STOP"),
+                ("mpd-time", "(0, 1)")]
+    return $ fromMaybe (Map.fromList stop) $ do
         msng <- sng
         let ms = (msng, sts)
-        let fl = sngFile ms
+        let fi = sngFile ms
         let ti = sngTitle ms
         let ar = sngArtist ms
         let al = sngAlbum ms
         let st = sngState ms
         let tm = sngTime ms
-        return (MusicStatus fl ti ar al st tm)
+        let kv = [("mpd-file", fi),
+                  ("mpd-title", ti),
+                  ("mpd-artist", ar),
+                  ("mpd-album", al),
+                  ("mpd-state", st),
+                  ("mpd-time", tm)]
+        return $ Map.fromList kv
 
-getMusicStatus :: IO MusicStatus
-getMusicStatus = either (error . show) (id) <$> (withMPD $ musicStatus)
-        
+request :: IO Replacer
+request = either (error . show) (id) <$> (withMPD $ musicStatus)
+

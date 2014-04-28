@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="414" height="300">
-  <image width="414" height="207" xlink:href="BANNER_IMAGE" />
-  <text x="15" y="220" font-size="12" width="100%" height="100%" font-family="INFO_FONT" font-style="INFO_STYLE">File: SONG_FILE</text>
-  <text x="15" y="235" font-size="12" width="100%" height="100%" font-family="INFO_FONT" font-style="INFO_STYLE">Title: SONG_TITLE</text>
-  <text x="15" y="250" font-size="12" width="100%" height="100%" font-family="INFO_FONT" font-style="INFO_STYLE">Artist: SONG_ARTIST</text>
-  <text x="15" y="265" font-size="12" width="100%" height="100%" font-family="INFO_FONT" font-style="INFO_STYLE">Album: SONG_ALBUM</text>
-  <text x="15" y="280" font-size="12" width="100%" height="100%" font-family="INFO_FONT" font-style="INFO_STYLE">| SONG_PERCENT% | SONG_STATUS | TIMESTAMP</text>
+  <image width="414" height="207" xlink:href="$svg-image$" />
+  <text x="15" y="220" font-size="12" width="100%" height="100%" font-family="$svg-font$" font-style="$svg-style$">File: $mpd-file$</text>
+  <text x="15" y="235" font-size="12" width="100%" height="100%" font-family="$svg-font$" font-style="$svg-style$">Title: $mpd-title$</text>
+  <text x="15" y="250" font-size="12" width="100%" height="100%" font-family="$svg-font$" font-style="$svg-style$">Artist: $mpd-artist$</text>
+  <text x="15" y="265" font-size="12" width="100%" height="100%" font-family="$svg-font$" font-style="$svg-style$">Album: $mpd-album$</text>
+  <text x="15" y="280" font-size="12" width="100%" height="100%" font-family="$svg-font$" font-style="$svg-style$">| $mpd-time$% | $mpd-state$ | $svg-time$ |</text>
 </svg>
