@@ -1,12 +1,11 @@
 module Main (main) where
 import Network.CGI
-import System.Process.ByteString (readProcessWithExitCode)
 import Data.ByteString.Lazy (fromStrict, toStrict)
 import Data.ByteString.Lazy.Builder (toLazyByteString, stringUtf8)
 import qualified MPD
 import qualified MOCP
 import GenSVG
-import Utility ((<$>))
+import Utility
 
 tmp = "test.tmp"
 fnt = "serif"
@@ -22,9 +21,7 @@ main = do
     let ss = SVGSettings tmp fnt stl img tft
     r <- genSVG ss [mpd, mocp]
     let svg = toStrict $ toLazyByteString $ stringUtf8 r
-    png <- readProcess "convert" ["svg:-", "-colors", "16", "png:-"] svg
+    png <- readProcessBS "convert" ["svg:-", "-colors", "16", "png:-"] svg
     runCGI $ handleErrors $ do
         setHeader "Content-type" "image/png"
         outputFPS $ fromStrict png
-    where
-    readProcess f a s = (\(_,x,_) -> x) <$> readProcessWithExitCode f a s
