@@ -1,4 +1,4 @@
-module Utility ((//), (<$>), date, Replacer, Filter, filterReplace, readProcessBS) where
+module Utility ((//), (<$>), date, Replacer, Filter, filterReplace, readProcessWithExitCodeBS) where
 import System.Time (getClockTime, toCalendarTime, formatCalendarTime)
 import System.Locale (defaultTimeLocale)
 import Data.Functor ((<$>))
@@ -8,31 +8,37 @@ import qualified Data.Map.Strict as Map
 import Data.Map.Strict (Map, (!), (\\), keys)
 import Data.Maybe (fromMaybe)
 
-import qualified Control.Exception as C
+import Control.Exception
 import Control.Monad
-import Control.Concurrent
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as B
 import System.Process
-import System.Exit (ExitCode (..))
+import System.Exit (ExitCode)
 import System.IO
+import Control.Concurrent
 
-readProcessBS :: FilePath -> [String] -> ByteString -> IO ByteString
-readProcessBS cmd args input = do
-    (Just inh, Just outh, _, pid) <- createProcess (proc cmd args) { std_in  = CreatePipe, std_out = CreatePipe, std_err = Inherit }
-    output  <- B.hGetContents outh
-    outMVar <- newEmptyMVar
-    _ <- forkIO $ C.evaluate (B.length output) >> putMVar outMVar ()
-    when (not (B.null input)) $ do { B.hPutStr inh input; hFlush inh }
-    hClose inh
-    takeMVar outMVar
-    hClose outh
-    ex <- waitForProcess pid
-    case ex of
-        ExitSuccess   -> return output
-        ExitFailure r -> error ("readProcess: " ++ cmd ++ ' ':unwords (map show args) ++ " (exit " ++ show r ++ ")")
+forkWait :: IO a -> IO (IO a)
+forkWait a = do
+    res <- newEmptyMVar
+    _ <- mask $ \restore -> forkIO $ try (restore a) >>= putMVar res
+    return (takeMVar res >>= either (\ex -> throwIO (ex :: SomeException)) return)
 
-
+readProcessWithExitCodeBS :: FilePath -> [String] -> ByteString -> IO (ExitCode, ByteString, ByteString)
+readProcessWithExitCodeBS cmd args input = mask $ \restore -> do
+    (Just inh, Just outh, Just errh, pid) <- createProcess (proc cmd args) { std_in  = CreatePipe, std_out = CreatePipe, std_err = CreatePipe }
+    flip onException
+        (do hClose inh; hClose outh; hClose errh;
+            terminateProcess pid; waitForProcess pid) $ restore $ do
+        waitOut <- forkWait $ B.hGetContents outh
+        waitErr <- forkWait $ B.hGetContents errh
+        unless (B.null input) $ do B.hPutStr inh input; hFlush inh
+        hClose inh
+        out <- waitOut
+        err <- waitErr
+        hClose outh
+        hClose errh
+        ex <- waitForProcess pid
+        return (ex, out, err)
 
 
 
