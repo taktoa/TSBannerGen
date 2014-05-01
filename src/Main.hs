@@ -20,9 +20,7 @@ main = do
     mpd  <- MPD.request
     mocp  <- MOCP.request
     let ss = SVGSettings tmp fnt stl img tft
-    r <- genJSON [mpd, mocp]
-    putStr r
-{-    r <- genSVG ss [mpd, mocp]
+    r <- genSVG ss [mpd, mocp]
     let svg = toStrict $ toLazyByteString $ stringUtf8 r
     png <- readProcess "convert" ["svg:-", "-colors", "16", "png:-"] svg
     runCGI $ handleErrors $ do
@@ -30,4 +28,3 @@ main = do
         outputFPS $ fromStrict png
     where
     readProcess f a s = (\(_,x,_) -> x) <$> readProcessWithExitCodeBS f a s
--}
