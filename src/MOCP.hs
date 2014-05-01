@@ -1,10 +1,10 @@
 module MOCP (request) where
-import System.Process
+import System.Process (readProcess)
 import Data.List (intercalate)
 import Data.List.Split (splitOn)
 import Control.Monad (when)
 import qualified Data.Map.Strict as Map
-import Utility
+import Utility ((<$>), Replacer)
 
 query :: String -> IO String
 query s = init <$> readProcess "mocp" ["-Q", s] ""
@@ -19,7 +19,7 @@ mocpQuery = do
 request :: IO Replacer
 request = do
     q <- mocpQuery
-    when (length q /= 7) (error "MOCP query failed")
+    when (length q /= 7) (return $ error "MOCP query failed")
     let [fi, ti, ar, al, st, cs, ts] = q
     let tm = show (read cs :: Int, read ts :: Int)
     let kv =    [("mocp-file", fi),
