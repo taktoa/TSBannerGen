@@ -1,4 +1,4 @@
-module JSON (genJSON) where
+module Sinks.JSON (genJSON) where
 import qualified Data.Map.Strict as Map
 import Data.Map.Strict ((!), (\\), keys, Map, toList, unions)
 import Utility

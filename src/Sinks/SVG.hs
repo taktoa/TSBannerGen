@@ -1,4 +1,4 @@
-module SVG (SVGSettings (..), genSVG) where
+module Sinks.SVG (SVGSettings (..), genSVG) where
 import Data.List.Split (splitOn)
 import qualified Data.Map.Strict as Map
 import Data.Map.Strict ((!), (\\), keys)

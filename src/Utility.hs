@@ -1,4 +1,4 @@
-module Utility ((//), (<$>), date, Replacer, Filter, filterReplace, readProcessWithExitCodeBS) where
+module Utility ((//), (<$>), (<*>), date, Replacer, Filter, filterReplace, readProcessWithExitCodeBS, assert) where
 import System.Time (getClockTime, toCalendarTime, formatCalendarTime)
 import System.Locale (defaultTimeLocale)
 import Data.Functor ((<$>))
@@ -7,6 +7,8 @@ import Data.List.Split (splitOn)
 import qualified Data.Map.Strict as Map
 import Data.Map.Strict (Map, (!), (\\), keys)
 import Data.Maybe (fromMaybe)
+import Control.Applicative ((<*>))
+
 
 import Control.Exception
 import Control.Monad
