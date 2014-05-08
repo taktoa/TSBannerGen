@@ -6,6 +6,7 @@ import Data.ByteString.Lazy.Builder (toLazyByteString, stringUtf8)
 import Data.Monoid (mconcat)
 import Data.Text (Text)
 import qualified Data.Text as T
+import qualified Data.Text.Lazy as TL
 import qualified Sources.MPD as MPD
 import qualified Sources.MOCP as MOCP
 import Sinks.SVG
@@ -40,7 +41,7 @@ main = scotty 3000 $ do
     mpd <- liftIO MPD.request
     j <- liftIO (genJSON [mpd])
     get "/json" $ do
-        text $ j
+        text $ TL.fromStrict j
 
 {-    get "/:word" $ do
         beam <- param "word"

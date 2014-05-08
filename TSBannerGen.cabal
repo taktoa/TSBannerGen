@@ -63,7 +63,7 @@ executable TSBannerGen
   --  other-extensions: Safe, BangPatterns, OverloadedStrings, TupleSections
   
   -- Other library packages from which modules are imported.
-  build-depends:       base, scotty, libmpd, old-time, old-locale, process, bytestring, text, transformers, containers, split
+  build-depends:       base, scotty, libmpd, old-time, old-locale, stm, process, bytestring, text, transformers, containers, split
   
   -- Directories containing source files.
   hs-source-dirs:      src
