@@ -20,12 +20,12 @@ stl = "normal"
 img = "base.png"
 tft = "%H:%M:%S %Z | %B %e, %Y"
 
+ss = SVGSettings tmp fnt stl img tft
 
 oldmain :: IO ()
 oldmain = do
     mpd  <- MPD.request
     mocp  <- MOCP.request
-    let ss = SVGSettings tmp fnt stl img tft
     r <- genJSON [mocp]
     print r
 
@@ -40,8 +40,16 @@ renderSVG o t = readProcessLBS rp ro svg
 main = scotty 3000 $ do
     mpd <- liftIO MPD.request
     j <- liftIO (genJSON [mpd])
+--    r <- liftIO (genSVG ss [mpd])
+--    s <- liftIO $ renderSVG ["-colors", "16"] (T.pack r)
     get "/json" $ do
         text $ TL.fromStrict j
+    get "/banner.png" $ do
+        setHeader "Content-Type" "image/png"
+        r <- liftIO $ genSVG ss [mpd]
+        s <- liftIO $ renderSVG ["-colors", "16"] (T.pack r)
+        raw s
+        
 
 {-    get "/:word" $ do
         beam <- param "word"

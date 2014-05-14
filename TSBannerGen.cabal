@@ -16,10 +16,10 @@ version:             0.1.0.0
 synopsis:            A dynamic banner generator for TeamSpeak 3
 
 -- A longer description of the package.
--- description:         
+description:         A dynamic banner generator for TeamSpeak 3
 
 -- URL for the project homepage or repository.
-homepage:            http://fuspr.net
+homepage:            https://github.com/taktoa/TSBannerGen
 
 -- The license under which the package is released.
 license:             GPL-3
@@ -32,12 +32,12 @@ author:              Remy Goldschmidt
 
 -- An email address to which users can send suggestions, bug reports, and 
 -- patches.
-maintainer:          remy.goldschmidt@gmail.com
+maintainer:          taktoa@gmail.com
 
 -- A copyright notice.
 -- copyright:           
 
--- category:            
+category:            Web
 
 build-type:          Simple
 
@@ -48,7 +48,9 @@ build-type:          Simple
 -- Constraint on the version of Cabal needed to build this package.
 cabal-version:       >=1.10
 
-
+source-repository head
+    type:            git
+    location:        https://github.com/taktoa/TSBannerGen
 
 executable TSBannerGen
   -- .hs or .lhs file containing the Main module.
@@ -63,7 +65,7 @@ executable TSBannerGen
   --  other-extensions: Safe, BangPatterns, OverloadedStrings, TupleSections
   
   -- Other library packages from which modules are imported.
-  build-depends:       base, scotty, libmpd, old-time, old-locale, stm, process, bytestring, text, transformers, containers, split
+  build-depends:       base < 5, scotty, libmpd, old-time, old-locale, stm, process, bytestring, text, transformers, containers, split
   
   -- Directories containing source files.
   hs-source-dirs:      src
