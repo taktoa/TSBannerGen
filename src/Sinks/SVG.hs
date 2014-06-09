@@ -1,5 +1,6 @@
 module Sinks.SVG (SVGSettings (..), genSVG) where
 import Data.List.Split (splitOn)
+import Data.Text (Text, pack)
 import qualified Data.Map.Strict as Map
 import Data.Map.Strict ((!), (\\), keys)
 import Data.Maybe (fromMaybe)
@@ -14,7 +15,7 @@ data SVGSettings = SVGSettings {
         tsfmt    :: String
     } deriving (Show, Read)
 
-genSVG :: SVGSettings -> [Replacer] -> IO String
+genSVG :: SVGSettings -> [Replacer] -> IO Text
 genSVG s rs = do
     let (SVGSettings tmp ft stl img tf) = s
     let cutLen = take 54
@@ -43,4 +44,4 @@ genSVG s rs = do
                              ("svg-image", img),
                              ("svg-time", timestamp)]
     template <- readFile tmp
-    return $ filterReplace "$" filt (svgs:rs) template
+    return $ pack $ filterReplace "$" filt (svgs:rs) template

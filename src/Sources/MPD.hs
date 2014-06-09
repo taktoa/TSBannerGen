@@ -31,7 +31,9 @@ sngState = conv . MPD.stState . snd
     conv Stopped = "STOP"
 
 sngTime :: MPDState -> String
-sngTime = show . (\(x, y) -> (round x, fromIntegral y)) . MPD.stTime . snd
+sngTime = show . check . (\(x, y) -> (round x, fromIntegral y)) . MPD.stTime . snd
+    where
+    check t = if t == (0, 0) then (0, 1) else t
 
 types = ["mpd-file", "mpd-title", "mpd-artist", "mpd-album", "mpd-state", "mpd-time"]
 

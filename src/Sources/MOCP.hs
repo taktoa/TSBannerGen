@@ -21,7 +21,8 @@ request = do
     q <- mocpQuery
     return $! assert (length q /= 7)
     let [fi, ti, ar, al, st, cs, ts] = q
-    let tm = show (read cs :: Int, read ts :: Int)
+    let t = show (read cs :: Int, read ts :: Int)
+    let tm = if t == "(0, 0)" then "(0, 1)" else t
     let kv =    [("mocp-file", fi),
                  ("mocp-title", ti),
                  ("mocp-artist", ar),
