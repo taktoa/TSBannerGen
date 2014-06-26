@@ -1,5 +1,4 @@
 module Main (main) where
---import Network.CGI (setHeader, outputFPS, runCGI, handleErrors)
 import Web.Scotty
 import Data.ByteString.Lazy (ByteString)
 import Data.ByteString.Lazy.Builder (toLazyByteString, stringUtf8)
@@ -20,18 +19,10 @@ fnt = "serif"
 stl = "normal"
 img = "base.png"
 tft = "%H:%M:%S %Z | %B %e, %Y"
-
+opt = ["-colors", "16"]
 
 ss = SVGSettings tmp fnt stl img tft
-ps = PNGSettings tmp fnt stl img tft
-
-oldmain :: IO ()
-oldmain = do
-    mpd <- MPD.request
-    mocp <- MOCP.request
-    r <- genJSON [mocp]
-    print r
-
+ps = PNGSettings opt tmp fnt stl img tft
 
 renderSVG :: [String] -> Text -> IO ByteString
 renderSVG o t = readProcessLBS rp ro svg
@@ -41,8 +32,6 @@ renderSVG o t = readProcessLBS rp ro svg
     svg = toLazyByteString $ stringUtf8 $ T.unpack t
 
 main = scotty 3000 $ do
---    r <- liftIO (genSVG ss [mpd])
---    s <- liftIO $ renderSVG ["-colors", "16"] (T.pack r)
     get "/banner.json" $ do
         setHeader "Content-Type" "application/json"
         mpd <- liftIO MPD.request
@@ -57,11 +46,4 @@ main = scotty 3000 $ do
         setHeader "Content-Type" "image/png"
         mpd <- liftIO MPD.request
         p <- liftIO (genPNG ps [mpd])
-        text $ TL.fromStrict p
-
-{-    get "/:word" $ do
-        beam <- param "word"
-        html $ mconcat ["<h1>Scotty, ", beam, " me up!</h1>"]
-
-    r <- genSVG ss [mpd, mocp]
--}
+        raw p
