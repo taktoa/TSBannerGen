@@ -1,5 +1,5 @@
 module Main (main) where
---import Network.CGI (setHeader, outputFPS, runCGI, handleErrors)
+
 import           Control.Monad.IO.Class       (liftIO)
 import           Data.ByteString.Lazy         (ByteString)
 import           Data.ByteString.Lazy.Builder (stringUtf8, toLazyByteString)
@@ -20,17 +20,10 @@ fnt = "serif"
 stl = "normal"
 img = "base.png"
 tft = "%H:%M:%S %Z | %B %e, %Y"
-
+opt = ["-colors", "16"]
 
 ss = SVGSettings tmp fnt stl img tft
-ps = PNGSettings tmp fnt stl img tft
-
-oldmain :: IO ()
-oldmain = do
-    mpd <- MPD.request
-    mocp <- MOCP.request
-    r <- genJSON [mocp]
-    print r
+ps = PNGSettings opt tmp fnt stl img tft
 
 renderSVG :: [String] -> Text -> IO ByteString
 renderSVG o t = readProcessLBS rp ro svg
@@ -54,4 +47,4 @@ main = scotty 3000 $ do
         setHeader "Content-Type" "image/png"
         mpd <- liftIO MPD.request
         p <- liftIO (genPNG ps [mpd])
-        text $ TL.fromStrict p
+        raw p

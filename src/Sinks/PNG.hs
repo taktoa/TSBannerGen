@@ -1,15 +1,13 @@
-module PNG where
-import Data.ByteString.Lazy (ByteString)
-import Data.ByteString.Lazy.Builder (toLazyByteString, stringUtf8)
-import Data.Monoid (mconcat)
-import Data.Text (Text)
-import qualified Data.Text as T
-import qualified Data.Text.Lazy as TL
-import Sinks.SVG
-import Control.Monad.IO.Class (liftIO)
-import Utility
+module Sinks.PNG (genPNG, PNGSettings (..)) where
 
-data SVGSettings = SVGSettings {
+import           Data.ByteString.Lazy         (ByteString)
+import           Data.ByteString.Lazy.Builder (stringUtf8, toLazyByteString)
+import           Data.Text                    (Text, unpack)
+import           Sinks.SVG
+import           Utility
+
+data PNGSettings = PNGSettings {
+        options  :: [String],
         template :: String,
         font     :: String,
         style    :: String,
@@ -17,12 +15,14 @@ data SVGSettings = SVGSettings {
         tsfmt    :: String
     } deriving (Show, Read)
 
+pstoss (PNGSettings _ t f s i tf) = SVGSettings t f s i tf
+
 renderSVG :: [String] -> Text -> IO ByteString
 renderSVG o t = readProcessLBS rp ro svg
     where
     rp = "convert"
     ro = concat [["svg:-"], o, ["png:-"]]
-    svg = toLazyByteString $ stringUtf8 $ T.unpack t
+    svg = toLazyByteString $ stringUtf8 $ unpack t
 
-genPNG :: PNGSettings -> [Replacer] -> IO Text
-
+genPNG :: PNGSettings -> [Replacer] -> IO ByteString
+genPNG ps rs = genSVG (pstoss ps) rs >>= (\svg -> renderSVG (options ps) svg)
