@@ -1,19 +1,19 @@
 module Main (main) where
 --import Network.CGI (setHeader, outputFPS, runCGI, handleErrors)
-import Web.Scotty
-import Data.ByteString.Lazy (ByteString)
-import Data.ByteString.Lazy.Builder (toLazyByteString, stringUtf8)
-import Data.Monoid (mconcat)
-import Data.Text (Text)
-import qualified Data.Text as T
-import qualified Data.Text.Lazy as TL
-import qualified Sources.MPD as MPD
-import qualified Sources.MOCP as MOCP
-import Sinks.SVG
-import Sinks.PNG
-import Sinks.JSON
-import Control.Monad.IO.Class (liftIO)
-import Utility
+import           Control.Monad.IO.Class       (liftIO)
+import           Data.ByteString.Lazy         (ByteString)
+import           Data.ByteString.Lazy.Builder (stringUtf8, toLazyByteString)
+import           Data.Monoid                  (mconcat)
+import           Data.Text                    (Text)
+import qualified Data.Text                    as T
+import qualified Data.Text.Lazy               as TL
+import           Sinks.JSON
+import           Sinks.PNG
+import           Sinks.SVG
+import qualified Sources.MOCP                 as MOCP
+import qualified Sources.MPD                  as MPD
+import           Utility
+import           Web.Scotty
 
 tmp = "template.tmp"
 fnt = "serif"
@@ -32,7 +32,6 @@ oldmain = do
     r <- genJSON [mocp]
     print r
 
-
 renderSVG :: [String] -> Text -> IO ByteString
 renderSVG o t = readProcessLBS rp ro svg
     where
@@ -41,8 +40,6 @@ renderSVG o t = readProcessLBS rp ro svg
     svg = toLazyByteString $ stringUtf8 $ T.unpack t
 
 main = scotty 3000 $ do
---    r <- liftIO (genSVG ss [mpd])
---    s <- liftIO $ renderSVG ["-colors", "16"] (T.pack r)
     get "/banner.json" $ do
         setHeader "Content-Type" "application/json"
         mpd <- liftIO MPD.request
@@ -58,10 +55,3 @@ main = scotty 3000 $ do
         mpd <- liftIO MPD.request
         p <- liftIO (genPNG ps [mpd])
         text $ TL.fromStrict p
-
-{-    get "/:word" $ do
-        beam <- param "word"
-        html $ mconcat ["<h1>Scotty, ", beam, " me up!</h1>"]
-
-    r <- genSVG ss [mpd, mocp]
--}
